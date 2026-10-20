@@ -1,51 +1,74 @@
-# OpsMind
+<div align="center">
 
-**An AI-powered IT operations platform that triages support tickets with a team of cooperating LLM agents, grounds every answer in your own runbooks, and keeps a human in the loop for anything risky.**
+# 🧠 OpsMind
 
-OpsMind pairs a **FastAPI + LangGraph** backend with a **Next.js** dashboard. Employees raise tickets, a multi-agent workflow diagnoses the problem, retrieves relevant knowledge-base content (RAG), assesses security risk, proposes a resolution with a rollback plan, and has a reviewer agent sign off. High-risk actions are flagged for human approval. Everything runs on **local models through Ollama**, so your tickets and documents never leave your infrastructure.
+### AI-powered IT operations platform — multi-agent ticket triage, grounded in your own knowledge base
+
+OpsMind turns every support ticket into a guided, auditable workflow: a team of cooperating AI agents diagnoses the issue, searches your runbooks, assesses security risk, proposes a fix with a rollback plan, and flags anything risky for human approval — all running on **local models**, so your data never leaves your infrastructure.
 
 ![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
-![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C)
+![LangGraph](https://img.shields.io/badge/LangGraph-multi--agent-1C3C3C)
 ![Next.js](https://img.shields.io/badge/Next.js_16-000000?logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React_19-61DAFB?logo=react&logoColor=black)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-4169E1?logo=postgresql&logoColor=white)
-![Ollama](https://img.shields.io/badge/Ollama-local_LLMs-black)
+![Redis](https://img.shields.io/badge/Redis-Celery-DC382D?logo=redis&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-100%25_local_AI-black)
+
+</div>
 
 ---
 
-## Table of contents
+## ✨ Why OpsMind?
 
-- [Features](#features)
-- [How it works](#how-it-works)
-- [Architecture](#architecture)
-- [Tech stack](#tech-stack)
-- [Project structure](#project-structure)
-- [Getting started](#getting-started)
-- [Configuration](#configuration)
-- [API overview](#api-overview)
-- [Roles and security](#roles-and-security)
-- [Testing and code quality](#testing-and-code-quality)
-- [Project status](#project-status)
-- [Roadmap](#roadmap)
+| | |
+| --- | --- |
+| 🤖 **Seven cooperating agents** | Supervisor, Diagnosis, RAG, Security, Resolution, Reviewer and Ticket agents orchestrated with LangGraph. |
+| 📚 **Answers grounded in your docs** | Upload PDF, DOCX, XLSX, HTML and TXT files. They are chunked, embedded and searched with pgvector, so suggestions come from *your* runbooks. |
+| 🔒 **Private by design** | LLM and embeddings run locally through Ollama. No tickets or documents are sent to third-party AI services. |
+| 🛡️ **Safety built in** | Every proposed fix carries a risk rating, a step-by-step plan and a rollback plan. High-risk actions are flagged for human approval. |
+| ⚡ **Real-time** | A WebSocket assistant streams agent progress live to the dashboard. |
+| 🔌 **Jira-ready** | Create, update, comment on and sync Jira issues straight from OpsMind, with every action audit-logged. |
 
----
+## 🚀 Features
 
-## Features
+### Intelligent ticket workflow
+- **LangGraph state machine** with conditional routing, a reviewer feedback loop and a bounded recursion limit.
+- **Structured outputs everywhere.** Every agent returns validated Pydantic models, not free-form text.
+- **Self-review.** A reviewer agent approves a plan, or sends it back to diagnosis for another pass.
+- **Smart fallbacks.** The workflow skips ahead to the ticket stage after repeated errors instead of stalling.
+- **Editable prompts.** Each agent's prompt lives in a plain `.txt` file you can tune without touching code.
 
-- **Multi-agent ticket triage.** A LangGraph workflow with seven nodes: supervisor, diagnosis, RAG, security, resolution, reviewer and ticket.
-- **Retrieval-Augmented Generation.** Upload PDF, Word and Excel files, which are chunked, embedded with `bge-m3` and stored in PostgreSQL with **pgvector**. Agents cite the matching chunks.
-- **Risk-aware automation.** The security agent rates each case `low`, `medium`, `high` or `critical`, and risky resolutions are flagged as requiring human approval, each with a rollback plan.
-- **Self-correcting reviewer.** A reviewer agent can approve a plan or send it back to diagnosis for another pass (bounded retries and a recursion limit prevent loops).
-- **Real-time assistant.** A WebSocket endpoint streams workflow progress (`agent_started`, `approval_required`, and so on) to the chat UI.
-- **Jira integration.** Create, read, update and comment on Jira issues, and sync ticket status, with every action written to an audit log.
-- **Background ingestion.** Heavy document ingestion can be offloaded to **Celery** workers over Redis.
-- **Auth and roles.** JWT authentication with bcrypt password hashing and three roles: `employee`, `it_support`, `it_admin`.
-- **Observability.** Per-agent run tracking in the database, optional **LangSmith** tracing, structured logging, and `/health` endpoints for the API, database, Redis and Ollama.
-- **Modern dashboard.** Tickets, AI assistant, documents, approvals, Jira, monitoring and an admin area, built with Next.js, Tailwind CSS and Recharts.
+### Knowledge base (RAG)
+- Ingests **PDF, DOCX, XLSX, HTML and TXT**.
+- Configurable chunk size, overlap and top-k retrieval.
+- **pgvector** similarity search in PostgreSQL, with embeddings from `bge-m3`.
+- Optional **Celery** background ingestion for large files.
+- Content hashing and file-size limits for safe uploads.
 
-## How it works
+### Security and access control
+- **JWT authentication** with **bcrypt** password hashing.
+- **Role-based access control:** `employee`, `it_support`, `it_admin`.
+- Audit logging for Jira operations and ticket changes.
+- Consistent JSON error envelope with a **request ID** on every response (`x-request-id`) for easy tracing.
+- Configurable CORS and token lifetime.
 
-Each ticket flows through a LangGraph state machine:
+### Observability
+- Per-agent **run tracking** stored in the database.
+- Optional **LangSmith** tracing with workflow and ticket metadata.
+- Structured logging for workflow start and completion.
+- Health endpoints for the **API, PostgreSQL, Redis and Ollama**, shown live on the Monitoring page.
+
+### Modern dashboard
+- **IT command center** with ticket status and priority charts (Recharts), recent tickets and system health.
+- **Tickets** with filtering, detail view, conversation thread, status management and a one-click **Run workflow** button.
+- **AI assistant** with live agent status over WebSocket.
+- **Documents** with upload, ingestion and a searchable knowledge base.
+- **Approvals** view showing the proposed resolution, supporting evidence and rollback plan.
+- **Jira** and **Admin** pages, with role-aware navigation.
+- Responsive layout built with **Tailwind CSS 4**.
+
+## 🧩 How it works
 
 ```mermaid
 flowchart LR
@@ -62,17 +85,17 @@ flowchart LR
     TKT --> E([End])
 ```
 
-1. **Supervisor** classifies the request (category and priority).
-2. **Diagnosis** analyses the likely root cause.
-3. **RAG** pulls the most relevant chunks from your uploaded documents (top-k similarity search).
-4. **Security** scores the operational risk and decides whether a human must approve.
-5. **Resolution** produces a proposed action, ordered steps, the expected result and a rollback plan.
-6. **Reviewer** returns `approved`, `rejected` or `request_more_information`. A rejection loops back to diagnosis once.
-7. **Ticket** writes the outcome back. The ticket becomes `resolved`, or `in_progress` when approval is required.
+| Step | Agent | What it does |
+| --- | --- | --- |
+| 1 | **Supervisor** | Classifies the request by category and priority. |
+| 2 | **Diagnosis** | Analyses the likely root cause. |
+| 3 | **RAG** | Retrieves the most relevant chunks from your uploaded documents. |
+| 4 | **Security** | Rates operational risk (`low` / `medium` / `high` / `critical`) and decides whether a human must approve. |
+| 5 | **Resolution** | Produces the proposed action, ordered steps, expected result and rollback plan. |
+| 6 | **Reviewer** | Returns `approved`, `rejected` or `request_more_information`. |
+| 7 | **Ticket** | Persists the outcome: `resolved`, or `in_progress` when approval is required. |
 
-All model calls use structured output (Pydantic schemas), and each agent's prompt lives in `backend/src/backend/ai/prompts/`.
-
-## Architecture
+## 🏗️ Architecture
 
 ```
 ┌────────────────────┐   REST + WebSocket   ┌──────────────────────────────┐
@@ -94,22 +117,22 @@ All model calls use structured output (Pydantic schemas), and each agent's promp
                                       └───────────┘
 ```
 
-The backend uses a layered design (`api` → `services` → `repositories` → `db`), so HTTP handling, business logic and persistence stay separate.
+A clean layered backend (`api` → `services` → `repositories` → `db`) keeps HTTP handling, business logic and persistence separate and easy to test.
 
-## Tech stack
+## 🛠️ Tech stack
 
 | Layer | Technology |
 | --- | --- |
 | **Backend** | Python 3.14, FastAPI, Uvicorn, Pydantic v2, SQLAlchemy 2 (async), Alembic |
 | **AI / agents** | LangGraph, LangChain, Ollama (`gemma3:4b` for generation, `bge-m3` for embeddings), LangSmith (optional) |
-| **Data** | PostgreSQL with pgvector (asyncpg), Redis, Celery |
+| **Data** | PostgreSQL + pgvector (asyncpg), Redis, Celery |
 | **Document parsing** | pypdf, python-docx, openpyxl, BeautifulSoup, tiktoken |
 | **Auth** | JWT (python-jose), bcrypt / passlib |
 | **Integrations** | Jira (atlassian-python-api) |
 | **Frontend** | Next.js 16, React 19, TypeScript, Tailwind CSS 4, Axios, Recharts, lucide-react |
 | **Tooling** | uv, pytest, ruff, black, mypy, ESLint |
 
-## Project structure
+## 📁 Project structure
 
 ```
 OpsMind/
@@ -117,14 +140,14 @@ OpsMind/
 │   ├── alembic/                 # Database migrations (incl. pgvector setup)
 │   ├── src/backend/
 │   │   ├── main.py              # FastAPI app entry point
-│   │   ├── api/                 # Routes (auth, tickets, documents, jira, workflows, ws, health)
+│   │   ├── api/                 # Routes: auth, users, tickets, documents, jira, workflows, ws, health
 │   │   ├── agents/              # LangGraph workflow, nodes, state, run tracking
 │   │   ├── ai/                  # Ollama LLM and embedding clients, schemas, prompt files
 │   │   ├── rag/                 # Upload, text extraction, chunking, retrieval
 │   │   ├── integrations/jira/   # Jira client and sync service
 │   │   ├── services/            # Business logic
 │   │   ├── repositories/        # Data access
-│   │   ├── db/                  # Engine, session, Redis, ORM models
+│   │   ├── db/                  # Engine, sessions, Redis, ORM models
 │   │   ├── worker/              # Celery app and tasks
 │   │   ├── schemas/             # Pydantic request/response models
 │   │   └── core/                # Config, security, logging, error handling
@@ -132,20 +155,20 @@ OpsMind/
 │   ├── pyproject.toml
 │   └── requirements.txt
 └── frontend/
-    ├── app/                     # Next.js routes (dashboard, tickets, assistant, ...)
+    ├── app/                     # Pages: dashboard, tickets, assistant, documents, approvals, jira, monitoring, admin
     ├── components/              # App shell and UI primitives
     └── lib/                     # API client, auth, hooks, types
 ```
 
-## Getting started
+## ⚙️ Getting started
 
 ### Prerequisites
 
-- **Python 3.14** and [**uv**](https://docs.astral.sh/uv/) (or `pip`)
+- **Python 3.14** and [**uv**](https://docs.astral.sh/uv/)
 - **Node.js 20+** and npm
 - **PostgreSQL** with the [pgvector](https://github.com/pgvector/pgvector) extension available
 - **Redis** (or Valkey)
-- [**Ollama**](https://ollama.com) running locally
+- [**Ollama**](https://ollama.com)
 - *(Optional)* a Jira Cloud project and API token
 
 ### 1. Clone the repository
@@ -162,37 +185,29 @@ ollama pull gemma3:4b
 ollama pull bge-m3
 ```
 
-### 3. Set up the backend
+### 3. Start the backend
 
 ```bash
 cd backend
-
-# Install dependencies (uv recommended)
 uv sync
-# or: python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && pip install -e .
 
-# Create your environment file (see Configuration below)
-cp .env.example .env   # if you don't have an example file, create backend/.env by hand
-
-# Create the database, then apply migrations (this also enables the pgvector extension)
-alembic upgrade head
-
-# Run the API
+# Create backend/.env (see Configuration below), then:
+alembic upgrade head          # applies migrations and enables pgvector
 uv run uvicorn backend.main:app --reload --port 8000
 ```
 
-The interactive API docs are at **http://localhost:8000/docs**.
+Interactive API docs: **http://localhost:8000/docs**
 
 ### 4. (Optional) Start the Celery worker
 
-Only needed if you ingest documents through the background task endpoint.
+For background document ingestion:
 
 ```bash
 cd backend
 uv run celery -A backend.worker.celery_app.celery_app worker --loglevel=info
 ```
 
-### 5. Set up the frontend
+### 5. Start the frontend
 
 ```bash
 cd frontend
@@ -200,19 +215,19 @@ npm install
 npm run dev
 ```
 
-Open **http://localhost:3000**, register an account, and create your first ticket.
+Open **http://localhost:3000**, register an account and create your first ticket.
 
-> The frontend proxies `/api/*` and `/health/*` to the backend. It defaults to `http://127.0.0.1:8000`. Override it with `NEXT_PUBLIC_API_BASE_URL`.
+> The frontend proxies `/api/*` and `/health/*` to the backend (default `http://127.0.0.1:8000`). Change it with `NEXT_PUBLIC_API_BASE_URL`.
 
-## Configuration
+## 🔧 Configuration
 
-Settings are loaded from `backend/.env`. Only `DATABASE_URL` is required.
+Settings load from `backend/.env`. Only `DATABASE_URL` is required.
 
 ```env
 # --- Required ---
 DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/opsmind
 
-# --- Security (change in any non-local environment) ---
+# --- Security ---
 JWT_SECRET_KEY=replace-with-a-long-random-string
 JWT_ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=60
@@ -236,7 +251,7 @@ RAG_CHUNK_SIZE=1200
 RAG_CHUNK_OVERLAP=200
 RAG_TOP_K=5
 
-# --- Jira (optional; the integration is skipped when unset) ---
+# --- Jira (optional) ---
 JIRA_BASE_URL=https://your-company.atlassian.net
 JIRA_EMAIL=you@company.com
 JIRA_API_TOKEN=your-token
@@ -248,22 +263,22 @@ LANGSMITH_API_KEY=
 LANGSMITH_PROJECT=opsmind
 ```
 
-> **Never commit `.env`.** It is already ignored by `.gitignore`.
+> `.env` files are git-ignored, so your secrets stay local.
 
-## API overview
+## 📡 API overview
 
 | Area | Endpoints |
 | --- | --- |
 | **Auth** | `POST /api/v1/auth/register` · `POST /api/v1/auth/login` · `GET /api/v1/auth/me` |
 | **Users** | `GET /api/v1/users/me` · `GET /api/v1/users/{id}` |
-| **Tickets** | `POST/GET /api/v1/tickets` · `GET/PATCH /api/v1/tickets/{id}` · `POST /api/v1/tickets/{id}/messages` |
+| **Tickets** | `POST` / `GET /api/v1/tickets` · `GET` / `PATCH /api/v1/tickets/{id}` · `POST /api/v1/tickets/{id}/messages` |
 | **Documents** | `POST /api/v1/documents/upload` · `POST /api/v1/documents/{id}/ingest` · `POST /api/v1/documents/{id}/ingest-task` · `GET /api/v1/documents` · `GET /api/v1/documents/{id}` |
 | **Workflows** | `POST /api/v1/workflows/tickets/{ticket_id}/run` |
 | **Real-time** | `WS /api/v1/ws/chat?token=<jwt>` |
-| **Jira** | `POST /api/v1/jira/issues` · `GET/PATCH /api/v1/jira/issues/{key}` · `POST /api/v1/jira/issues/{key}/comments` · `POST /api/v1/jira/tickets/{id}/sync-status` |
+| **Jira** | `POST /api/v1/jira/issues` · `GET` / `PATCH /api/v1/jira/issues/{key}` · `POST /api/v1/jira/issues/{key}/comments` · `POST /api/v1/jira/tickets/{id}/sync-status` |
 | **Health** | `GET /health` · `/health/db` · `/health/redis` · `/health/ollama` |
 
-Full request and response schemas are available in the Swagger UI at `/docs`.
+Full schemas are available in the Swagger UI at `/docs`.
 
 ### WebSocket example
 
@@ -273,29 +288,21 @@ Connect to `ws://localhost:8000/api/v1/ws/chat?token=<jwt>` and send:
 { "ticket_id": "3f1c2b0e-0000-0000-0000-000000000000" }
 ```
 
-You will receive events such as `connected`, `message_received`, `agent_started`, and `approval_required` (with the workflow ID and risk level).
+You'll receive live events: `connected`, `message_received`, `agent_started` and `approval_required` (with workflow ID and risk level).
 
-## Roles and security
+## 👥 Roles
 
 | Role | Intended for |
 | --- | --- |
-| `employee` | Raising and following their own tickets |
-| `it_support` | Working tickets, using the Jira integration |
+| `employee` | Raising and following tickets |
+| `it_support` | Working tickets and using the Jira integration |
 | `it_admin` | Full access, including the admin area |
 
-Jira endpoints require `it_support` or `it_admin`.
-
-- Passwords are hashed with **bcrypt**, and sessions use short-lived **JWTs** (60 minutes by default).
-- Jira actions and sync failures are recorded in an **audit log** table.
-- Agents are prompted never to recommend unsafe commands, and anything the security agent flags is routed to a human.
-- **Before deploying:** set a strong `JWT_SECRET_KEY` (the default is a placeholder), restrict `CORS_ORIGINS`, and serve the app over HTTPS.
-
-## Testing and code quality
+## ✅ Testing and code quality
 
 ```bash
 cd backend
-
-uv run pytest          # run the test suite (auth, models, API routes, health)
+uv run pytest          # auth, models, API routes and health checks
 uv run ruff check .    # lint
 uv run black .         # format
 uv run mypy src        # type-check
@@ -304,32 +311,6 @@ cd ../frontend
 npm run lint
 ```
 
-## Project status
+## 👤 Author
 
-OpsMind is under active development. The backend platform is largely complete, and parts of the dashboard are still wired up to placeholder data.
-
-| Area | Status |
-| --- | --- |
-| Auth, users and roles | Done |
-| Tickets and messages | Done |
-| Document upload, ingestion and RAG retrieval | Done |
-| LangGraph multi-agent workflow | Done |
-| WebSocket assistant | Done |
-| Jira integration (API) | Done |
-| Health checks (API, DB, Redis, Ollama) | Done |
-| Approval queue UI | UI built, uses sample data; approve/reject API pending |
-| Jira health and agent-failure dashboard | Pending backend endpoints |
-
-## Roadmap
-
-- Backend approval API (approve and reject) wired to the Approvals page
-- Agent failure and run history endpoints for the Monitoring page
-- Jira health check
-- Pluggable monitoring connectors (Datadog, Grafana and others) for automated incident context
-- Role-based ticket visibility and an admin user-management UI
-- Docker Compose setup for one-command local startup
-- CI pipeline (tests, lint, type-check)
-
----
-
-Built by [Tiwari-Tech](https://github.com/Tiwari-Tech). Contributions, issues and ideas are welcome.
+Built by **[Tiwari-Tech](https://github.com/Tiwari-Tech)**. Feedback, issues and ideas are welcome.
